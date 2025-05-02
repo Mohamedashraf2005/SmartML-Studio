@@ -11,7 +11,7 @@ class DataDashboardApp:
         self.root.title("Data Visualization Dashboard")
         self.root.geometry("1000x600")
         self.root.configure(fg_color="#F5EDED")
-        self.root.iconbitmap("ml_logo.ico")
+        
 
         # ====== Customization Options ======
         self.button_width = 180
