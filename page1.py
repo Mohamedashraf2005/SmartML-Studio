@@ -2,14 +2,17 @@ import tkinter as tk
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
 
-
+#6482AD
+#7FA1C3
+#E2DAD6
+#F5EDED
 
 class DataUploaderApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Data Uploader")
-        self.root.geometry("700x400")
-        self.root.config(background="#441752")
+        self.root.geometry("1000x600")
+        self.root.config(background="#E2DAD6")
         self.root.iconbitmap("ml_logo.ico")
         
 
@@ -17,7 +20,7 @@ class DataUploaderApp:
 
     def create_widgets(self):
         # Main Frame
-        self.frame = ctk.CTkFrame(master=self.root, width=600, height=300, corner_radius=20, fg_color='#8174A0',bg_color='#441752')
+        self.frame = ctk.CTkFrame(master=self.root, width=600, height=300, corner_radius=20, fg_color='#6482AD',bg_color='#E2DAD6')
         self.frame.place(relx=0.5, rely=0.5, anchor="center")  
         self.frame.pack_propagate(False)
         
@@ -29,7 +32,7 @@ class DataUploaderApp:
         self.heading_label2.pack(pady=(10,0))
 
         #Upload Button
-        self.upload_button = ctk.CTkButton(self.frame, text="Upload your DataSet", width=370, height=35, command=self.upload_file,fg_color='#441752',hover_color='#A888B5')
+        self.upload_button = ctk.CTkButton(self.frame, text="Upload your DataSet", width=370, height=35, command=self.upload_file,fg_color='#7FA1C3',hover_color='#E2DAD6',text_color='white')
         self.upload_button.pack(pady=50)
 
         #File format info
@@ -48,7 +51,7 @@ class DataUploaderApp:
         popup = ctk.CTkToplevel(self.root)
         popup.geometry("300x200")
         popup.title("Success")
-        popup.configure(fg_color="#A888B5")
+        popup.configure(fg_color="#7FA1C3")
         popup.resizable(False, False)
         popup.grab_set()  # Modal behavior
 
@@ -64,12 +67,12 @@ class DataUploaderApp:
         popup.geometry(f"+{popup_x}+{popup_y}")
 
         # Green checkmark
-        check_label = ctk.CTkLabel(popup, text="✅", font=("Arial", 36), text_color="green", fg_color="#A888B5")
+        check_label = ctk.CTkLabel(popup, text="✅", font=("Arial", 36), text_color="green", fg_color="#7FA1C3")
         check_label.pack(pady=(20, 5))
 
         # Message
         message_label = ctk.CTkLabel(popup, text="Uploaded successfully", font=("Arial Bold", 16),
-                                     text_color="black", fg_color="#A888B5")
+                                     text_color="black", fg_color="#7FA1C3")
         message_label.pack(pady=5)
 
         # Close Button
