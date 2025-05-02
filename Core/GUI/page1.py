@@ -13,7 +13,7 @@ class DataUploaderApp:
         self.root.title("Data Uploader")
         self.root.geometry("1000x600")
         self.root.config(background="#E2DAD6")
-        self.root.iconbitmap("ml_logo.ico")
+        
         
 
         self.create_widgets()
