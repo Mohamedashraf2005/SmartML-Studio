@@ -4,7 +4,7 @@ from page1 import DataUploaderApp
 from page2 import DataDashboardApp
 from page3 import DataPreprocessingApp
 from page4 import ModelSelectionApp
-
+ 
 class MainApp:
     def __init__(self, root):
         self.root = root
@@ -100,6 +100,18 @@ class MainApp:
             self.current_page.pack_forget()
         self.current_page = self.pages[name]
         self.current_page.pack(fill="both", expand=True)
+        # Trigger page-specific initialization with data check
+        if name == "Uploader":
+            pass
+        elif name == "Dashboard" and self.dashboard_app:
+            self.dashboard_app.load_dataset()
+            self.dashboard_app.show_card(self.dashboard_app.tab_names[0])
+        elif name == "Preprocessing" and self.preprocessing_app:
+            self.preprocessing_app.load_dataset()
+            self.preprocessing_app.update_column_menus()
+        elif name == "ModelSelection" and self.model_selection_app:
+            self.model_selection_app.load_dataset()
+            self.model_selection_app.update_ui_state()
 
     def enable_nav_buttons(self):
         for btn in self.nav_buttons.values():

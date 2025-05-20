@@ -26,16 +26,15 @@ class DataUploaderApp:
             font=("Arial", 16), text_color="#cccccc"
         ).pack(pady=(0, 20))
 
-        # Welcome message
         self.welcome_label = ctk.CTkLabel(
             self.frame, text="Welcome! Start by uploading your dataset",
             font=("Arial", 18, "bold"), text_color="#ffffff",
             fg_color="#5e7a51", corner_radius=10, width=400, height=50
         )
         self.welcome_label.pack(pady=20)
-        self.welcome_label.configure(state="disabled")  # To prevent interaction
-        self.fade_in(self.welcome_label, 0, 1, 5)  # Fade-in animation
-        self.root.after(5000, lambda: self.fade_out(self.welcome_label, 1, 0, 5))  # Fade-out after 5 seconds
+        self.welcome_label.configure(state="disabled")
+        self.fade_in(self.welcome_label, 0, 1, 2)
+        self.root.after(5000, lambda: self.fade_out(self.welcome_label, 1, 0, 2))
 
         upload_button = ctk.CTkButton(
             self.frame, text="Upload Dataset", width=400, height=50, command=self.upload_file,
@@ -80,8 +79,6 @@ class DataUploaderApp:
         popup.title("Success")
         popup.configure(fg_color="#435242")
         popup.resizable(False, False)
-        popup.attributes('-alpha', 0.0)
-        popup.after(100, lambda: popup.attributes('-alpha', 1.0))
 
         root_x = self.root.winfo_rootx()
         root_y = self.root.winfo_rooty()
@@ -91,6 +88,10 @@ class DataUploaderApp:
         popup_y = root_y + (root_height // 2) - (200 // 2)
         popup.geometry(f"+{popup_x}+{popup_y}")
 
+        popup.transient(self.root)
+        popup.grab_set()
+        popup.lift()
+
         ctk.CTkLabel(
             popup, text="✅", font=("Arial", 36), text_color="#5e7a51"
         ).pack(pady=(20, 5))
@@ -98,12 +99,9 @@ class DataUploaderApp:
             popup, text="Dataset uploaded successfully!", font=("Arial", 18, "bold"),
             text_color="#ffffff"
         ).pack(pady=5)
+        ctk.CTkLabel(
+            popup, text="Redirecting to Dashboard...", font=("Arial", 14),
+            text_color="#cccccc"
+        ).pack(pady=5)
 
-        def on_popup_close():
-            popup.destroy()
-            self.main_app.show_page("Dashboard")
-
-        ctk.CTkButton(
-            popup, text="Close", width=120, fg_color="#445344", hover_color="#6b9463",
-            text_color="#ffffff", command=on_popup_close, font=("Arial", 14)
-        ).pack(pady=(15, 10))
+        popup.after(2500, lambda: [popup.destroy(), self.main_app.show_page("Dashboard")])
