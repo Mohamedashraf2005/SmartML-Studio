@@ -5,7 +5,6 @@ from sklearn.preprocessing import OneHotEncoder, LabelEncoder, MinMaxScaler, Sta
 from pandastable import Table
 import tkinter as tk
 
-
 class DataPreprocessingApp:
     def __init__(self, parent, main_app):
         self.root = parent
@@ -29,17 +28,15 @@ class DataPreprocessingApp:
             elif file_path.endswith(".xlsx"):
                 self.dataset = pd.read_excel(file_path)
             print(f"Dataset loaded successfully in Preprocessing: {file_path} ({self.dataset.shape[0]} rows, {self.dataset.shape[1]} columns)")
-            self.update_column_menus()  # Update dropdowns after loading dataset
+            self.update_column_menus()
         except Exception as e:
             print(f"Error loading dataset: {e}")
             self.dataset = None
 
     def create_widgets(self):
-        # Main scrollable container
         self.container = ctk.CTkScrollableFrame(self.root, fg_color="#435242")
         self.container.pack(expand=True, fill="both", padx=10, pady=10)
 
-        # Title and subtitle
         ctk.CTkLabel(
             self.container, text="Data Preprocessing Options", font=("Arial", 24, "bold"),
             text_color="#ffffff"
@@ -49,13 +46,11 @@ class DataPreprocessingApp:
             font=("Arial", 14), text_color="#cccccc"
         ).pack(pady=(0, 10))
 
-        # Data display area
         self.data_display_frame = ctk.CTkFrame(self.container, fg_color="#445344", corner_radius=15, border_width=3, border_color="#3a473a")
         self.data_display_frame.pack(fill="x", padx=20, pady=0)
 
-        self.data_table = None  # Will hold pandastable.Table
+        self.data_table = None
 
-        # Buttons to show datasets
         button_frame = ctk.CTkFrame(self.container, fg_color="transparent")
         button_frame.pack(pady=10)
 
@@ -71,7 +66,6 @@ class DataPreprocessingApp:
             font=("Arial", 14, "bold"), command=self.show_preprocessed_dataset
         ).pack(side="left", padx=10)
 
-        # Preprocessing cards
         cards_container = ctk.CTkFrame(self.container, fg_color="#435242")
         cards_container.pack(fill="x", padx=20, pady=10)
 
@@ -89,9 +83,8 @@ class DataPreprocessingApp:
             row, col = divmod(idx, 2)
             card = self.create_card(cards_container, label, options)
             card.grid(row=row, column=col, padx=15, pady=8, sticky="nsew")
-            self.processing_cards.append(card)  # Store the card
+            self.processing_cards.append(card)
 
-        # Apply button (retained for global application if needed)
         apply_button = ctk.CTkButton(
             self.container, text="Apply All Preprocessing", width=250, height=50,
             fg_color="#5e7a51", text_color="#ffffff", hover_color="#6b9463",
@@ -99,9 +92,8 @@ class DataPreprocessingApp:
         )
         apply_button.pack(pady=10)
 
-        # Navigation buttons
         nav_frame = ctk.CTkFrame(self.container, fg_color="transparent")
-        nav_frame.pack(pady=10)
+        nav_frame.pack(pady=10, fill="x")
 
         back_button = ctk.CTkButton(
             nav_frame, text="Back to Dashboard", width=180, height=40,
@@ -113,7 +105,7 @@ class DataPreprocessingApp:
         next_button = ctk.CTkButton(
             nav_frame, text="Next Page", width=180, height=40,
             fg_color="#445344", text_color="#ffffff", hover_color="#6b9463",
-            font=("Arial", 14, "bold"), command=lambda: self.main_app.show_page("ModelSelection")
+            font=("Arial", 14, "bold"), command=lambda: self.main_app.show_page("Model Evaluation")
         )
         next_button.pack(side="left", padx=10)
 
@@ -127,10 +119,8 @@ class DataPreprocessingApp:
             frame, text=text, font=("Arial", 16, "bold"), text_color="#ffffff", wraplength=150
         ).pack(pady=(15, 5))
 
-        # Initialize selections for this card
         self.selections[text] = {"method": options[0], "column": None}
 
-        # Method selection
         method_menu = ctk.CTkOptionMenu(
             frame, values=options, fg_color="#445344", text_color="#ffffff",
             button_color="#445344", button_hover_color="#6b9463",
@@ -139,7 +129,6 @@ class DataPreprocessingApp:
         )
         method_menu.pack(pady=(0, 5))
 
-        # Column selection
         if self.dataset is not None:
             if text == "Categorical Encoding:":
                 col_names = [col for col in self.dataset.columns if self.dataset[col].dtype == 'object' or pd.api.types.is_categorical_dtype(self.dataset[col])]
@@ -158,7 +147,6 @@ class DataPreprocessingApp:
         )
         column_menu.pack(pady=(0, 5))
 
-        # Apply button for each section
         apply_button = ctk.CTkButton(
             frame, text="Apply", width=120, height=30,
             fg_color="#5e7a51", text_color="#ffffff", hover_color="#6b9463",
@@ -179,7 +167,6 @@ class DataPreprocessingApp:
                 font=("Arial", 14), text_color="#cccccc", wraplength=300
             ).pack(pady=(10, 10))
         else:
-            # Create a new Toplevel window for the table
             top = tk.Toplevel()
             frame = tk.Frame(top)
             frame.pack(fill="both", expand=True)
@@ -241,7 +228,6 @@ class DataPreprocessingApp:
             ).pack(pady=(10, 10))
             return
         
-        # Use preprocessed dataset if available, otherwise start with raw dataset
         df = self.preprocessed_dataset.copy() if self.preprocessed_dataset is not None else self.dataset.copy()
         
         selection = self.selections.get(key)
@@ -310,7 +296,6 @@ class DataPreprocessingApp:
             return
         df = self.dataset.copy()
         
-        # Apply preprocessing based on selections
         for key, selection in self.selections.items():
             method = selection.get("method")
             column = selection.get("column")
@@ -362,5 +347,5 @@ class DataPreprocessingApp:
 
         self.preprocessed_dataset = df
         self.main_app.shared_data["preprocessed_dataset"] = df
-        print("Preprocessing applied successfully")
+        print("All preprocessing steps applied successfully")
         self.show_preprocessed_dataset()

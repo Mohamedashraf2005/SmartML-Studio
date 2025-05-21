@@ -4,6 +4,7 @@ from page1 import DataUploaderApp
 from page2 import DataDashboardApp
 from page3 import DataPreprocessingApp
 from page4 import ModelSelectionApp
+from page5 import ModelEvaluationApp
  
 class MainApp:
     def __init__(self, root):
@@ -51,7 +52,8 @@ class MainApp:
             ("Data Uploader", "Uploader", "normal"),
             ("Dashboard", "Dashboard", "disabled"),
             ("Preprocessing", "Preprocessing", "disabled"),
-            ("Model Selection", "ModelSelection", "disabled")
+            ("Model Selection", "ModelSelection", "disabled"),
+            ("Model Evaluation", "Evaluation", "disabled")  # <-- Add this line
         ]
 
         self.nav_buttons = {}
@@ -72,23 +74,26 @@ class MainApp:
     def create_container(self):
         self.container = ctk.CTkFrame(self.root, fg_color="transparent")
         self.container.pack(fill="both", expand=True)
-
+        
     def load_pages(self):
         try:
             uploader_frame = ctk.CTkFrame(self.container)
             dashboard_frame = ctk.CTkFrame(self.container)
             preprocessing_frame = ctk.CTkFrame(self.container)
             model_selection_frame = ctk.CTkFrame(self.container)
+            evaluation_frame = ctk.CTkFrame(self.container)  # New frame
 
             self.pages["Uploader"] = uploader_frame
             self.pages["Dashboard"] = dashboard_frame
             self.pages["Preprocessing"] = preprocessing_frame
             self.pages["ModelSelection"] = model_selection_frame
+            self.pages["Evaluation"] = evaluation_frame  # Add to pages
 
             self.uploader_app = DataUploaderApp(uploader_frame, self)
             self.dashboard_app = DataDashboardApp(dashboard_frame, self)
             self.preprocessing_app = DataPreprocessingApp(preprocessing_frame, self)
             self.model_selection_app = ModelSelectionApp(model_selection_frame, self)
+            self.evaluation_app = ModelEvaluationApp(evaluation_frame, self)  # Instantiate
         except Exception as e:
             print(f"Error loading pages: {e}")
 
@@ -111,8 +116,12 @@ class MainApp:
             self.preprocessing_app.update_column_menus()
         elif name == "ModelSelection" and self.model_selection_app:
             self.model_selection_app.load_dataset()
-            # Remove or replace: self.model_selection_app.update_ui_state()
-            self.model_selection_app.update_ui_state()  # Add this line
+            self.model_selection_app.update_ui_state()
+        elif name == "Evaluation" and hasattr(self, 'evaluation_app'):
+            self.evaluation_app.load_data()  # Load data for evaluation
+            self.evaluation_app.update_ui_state()  # Add UI/state initialization
+
+    
     def enable_nav_buttons(self):
         for btn in self.nav_buttons.values():
             btn.configure(state="normal")

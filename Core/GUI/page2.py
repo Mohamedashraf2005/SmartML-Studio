@@ -116,23 +116,6 @@ class DataDashboardApp:
         self.current_card.bind("<Enter>", lambda e: self.current_card.configure(fg_color="#5e7a51"))
         self.current_card.bind("<Leave>", lambda e: self.current_card.configure(fg_color="#445344"))
 
-        nav_frame = ctk.CTkFrame(self.cards_container, fg_color="transparent")
-        nav_frame.place(relx=0.5, rely=0.95, anchor="center")
-
-        back_button = ctk.CTkButton(
-            nav_frame, text="Back to Uploader", width=150, height=40,
-            fg_color="#445344", text_color="#ffffff", hover_color="#6b9463",
-            command=lambda: self.main_app.show_page("Uploader"), font=("Arial", 14)
-        )
-        back_button.pack(side="left", padx=10)
-
-        next_button = ctk.CTkButton(
-            nav_frame, text="Next Page", width=150, height=40,
-            fg_color="#445344", text_color="#ffffff", hover_color="#6b9463",
-            command=self.go_to_next_page, font=("Arial", 14)
-        )
-        next_button.pack(side="left", padx=10)
-
         self.show_card(self.tab_names[0])
 
     def create_card_content(self, text):
@@ -147,86 +130,73 @@ class DataDashboardApp:
             return
 
         if text == "Dataset Summary":
-            # Create a scrollable frame for the summary
             scrollable_frame = ctk.CTkScrollableFrame(
                 self.current_card,
                 width=380,
-                height=300,  # Adjust height as needed
+                height=300,
                 corner_radius=10,
-                fg_color="transparent",  # Transparent background
-                scrollbar_button_color="#4a4a4a",  # Scrollbar button color
-                scrollbar_button_hover_color="#666666"  # Scrollbar hover color
+                fg_color="transparent",
+                scrollbar_button_color="#4a4a4a",
+                scrollbar_button_hover_color="#666666"
             )
             scrollable_frame.pack(pady=(20, 10), padx=10, fill="both", expand=True)
 
-            # Format the summary text
             summary = f"DataSet Shape \nRows: {self.dataset.shape[0]}, Columns: {self.dataset.shape[1]}\n\n"
             summary += f"Total Null Values: {self.dataset.isnull().sum().sum()}\n"
             summary += f"Duplicate Rows: {self.dataset.duplicated().sum()}\n\n"
             summary += "\nData Types:\n"
             summary += f"{self.dataset.dtypes.to_string()}\n"
 
-            # Add the summary label inside the scrollable frame
             ctk.CTkLabel(
                 scrollable_frame,
                 text=summary,
                 font=("Arial", 14),
                 text_color="#ffffff",
-                wraplength=350,  # Slightly less than frame width to avoid text cutoff
+                wraplength=350,
                 justify="left",
                 anchor="w"
             ).pack(pady=10, padx=10, fill="x")
 
         elif text == "Show Dataset":
-            # Create a frame for the table and scrollbars
             table_frame = ctk.CTkFrame(self.current_card, fg_color="#445344")
             table_frame.pack(fill="both", expand=True, padx=10, pady=10)
 
-            # Create scrollbars
             scrollbar_y = ctk.CTkScrollbar(table_frame, orientation="vertical")
             scrollbar_x = ctk.CTkScrollbar(table_frame, orientation="horizontal")
 
-            # Create the Treeview
             tree = ttk.Treeview(
                 table_frame,
                 yscrollcommand=scrollbar_y.set,
                 xscrollcommand=scrollbar_x.set,
-                height=20  # Increased height for better visibility
+                height=20
             )
             scrollbar_y.configure(command=tree.yview)
             scrollbar_x.configure(command=tree.xview)
 
-            # Place the tree and scrollbars using grid
             tree.grid(row=0, column=0, sticky="nsew")
             scrollbar_y.grid(row=0, column=1, sticky="ns")
             scrollbar_x.grid(row=1, column=0, sticky="ew")
 
-            # Configure grid weights
             table_frame.grid_rowconfigure(0, weight=1)
             table_frame.grid_columnconfigure(0, weight=1)
 
-            # Define columns
             columns = list(self.dataset.columns)
             tree["columns"] = columns
             tree.heading("#0", text="Index", anchor="center")
             for col in columns:
                 tree.heading(col, text=col, anchor="center", command=lambda c=col: self.sort_column(tree, c, False))
-                # Dynamically adjust column width based on content
                 max_width = max(
-                    len(str(col)) * 10,  # Based on header
-                    max([len(str(x)) for x in self.dataset[col].dropna()] + [0]) * 8, 100  # Based on data
+                    len(str(col)) * 10,
+                    max([len(str(x)) for x in self.dataset[col].dropna()] + [0]) * 8, 100
                 )
                 tree.column(col, width=min(max_width, 200), anchor="center", stretch=True)
 
-            # Set index column width
             tree.column("#0", width=80, anchor="center")
 
-            # Insert data
             for idx, row in self.dataset.iterrows():
                 values = [str(row[col]) if pd.notna(row[col]) else "N/A" for col in columns]
                 tree.insert("", "end", text=str(idx), values=values, tags=("evenrow" if idx % 2 == 0 else "oddrow",))
 
-            # Style the Treeview
             style = ttk.Style()
             style.configure(
                 "Treeview",
@@ -250,7 +220,6 @@ class DataDashboardApp:
             tree.tag_configure("oddrow", background="#3a473a")
             tree.tag_configure("evenrow", background="#445344")
 
-            # Store tree for sorting
             self.tree = tree
 
         elif text == "Show Histogram":
@@ -322,7 +291,6 @@ class DataDashboardApp:
             self.barchart_feature_listbox.pack(pady=5)
 
             if self.dataset is not None:
-                # Prefer categorical or discrete columns for bar charts
                 for col in self.dataset.columns:
                     self.barchart_feature_listbox.insert("end", col)
 
@@ -377,6 +345,7 @@ class DataDashboardApp:
             self.reset_plots_button.pack(pady=(10, 30))
 
             self.toggle_column_dropdown("Histogram")
+
     def generate_barcharts(self):
         if self.dataset is None or self.dataset.empty:
             ctk.CTkLabel(
@@ -419,14 +388,13 @@ class DataDashboardApp:
             axes = np.array(axes).ravel()
 
             for i, col in enumerate(selected_columns):
-                # Use value_counts for bar chart
-                value_counts = self.dataset[col].value_counts().head(10)  # Limit to top 10 categories for readability
+                value_counts = self.dataset[col].value_counts().head(10)
                 value_counts.plot(kind='bar', ax=axes[i], color='orange', edgecolor='black')
                 axes[i].set_title(f'Bar Chart of {col}', fontsize=10)
                 axes[i].set_xlabel(col, fontsize=8)
                 axes[i].set_ylabel("Count", fontsize=8)
-                axes[i].set_xticks([])  # Disable x-axis ticks and labels
-                axes[i].set_yticks([])  # Disable y-axis ticks and labels
+                axes[i].set_xticks([])
+                axes[i].set_yticks([])
 
             for i in range(len(selected_columns), len(axes)):
                 axes[i].set_visible(False)
@@ -441,58 +409,6 @@ class DataDashboardApp:
                 self.barchart_frame, text=f"Error generating bar charts: {e}",
                 font=("Arial", 14), text_color="#ff0000"
             ).pack(pady=10)
-
-    # def generate_heatmap(self):
-    #     if self.dataset is None or self.dataset.empty:
-    #         ctk.CTkLabel(
-    #             self.heatmap_frame, text="No dataset loaded. Please upload a dataset.",
-    #             font=("Arial", 14), text_color="#ff0000"
-    #         ).pack(pady=10)
-    #         return
-
-    #     selected_indices = self.heatmap_feature_listbox.curselection()
-    #     selected_columns = [self.heatmap_feature_listbox.get(i) for i in selected_indices]
-
-    #     if len(selected_columns) > 10:
-    #         ctk.CTkLabel(
-    #             self.heatmap_frame, text="Please select up to 10 columns.",
-    #             font=("Arial", 14), text_color="#ff0000"
-    #         ).pack(pady=10)
-    #         return
-
-    #     if not selected_columns:
-    #         ctk.CTkLabel(
-    #             self.heatmap_frame, text="Please select at least one column.",
-    #             font=("Arial", 14), text_color="#ff0000"
-    #         ).pack(pady=10)
-    #         return
-
-    #     for widget in self.heatmap_frame.winfo_children():
-    #         widget.destroy()
-
-    #     numeric_columns = [col for col in selected_columns if self.dataset[col].dtype in ['float64', 'int64']]
-    #     if not numeric_columns:
-    #         ctk.CTkLabel(
-    #             self.heatmap_frame, text="Selected columns must be numeric.",
-    #             font=("Arial", 14), text_color="#ff0000"
-    #         ).pack(pady=10)
-    #         return
-
-    #     try:
-    #         corr_matrix = self.dataset[numeric_columns].corr()
-    #         fig, ax = plt.subplots(figsize=(6, 4))
-    #         sns.heatmap(corr_matrix, annot=False, cmap="coolwarm", ax=ax, fmt=".2f", vmin=-1, vmax=1)
-    #         ax.set_title("Correlation Heatmap", fontsize=12)
-    #         plt.tight_layout()
-
-    #         canvas = FigureCanvasTkAgg(fig, master=self.heatmap_frame)
-    #         canvas.draw()
-    #         canvas.get_tk_widget().pack(fill="both", expand=True, padx=10, pady=10)
-    #     except Exception as e:
-    #         ctk.CTkLabel(
-    #             self.heatmap_frame, text=f"Error generating heatmap: {e}",
-    #             font=("Arial", 14), text_color="#ff0000"
-    #         ).pack(pady=10)
 
     def generate_pairplot(self):
         if self.dataset is None or self.dataset.empty:
@@ -733,6 +649,3 @@ class DataDashboardApp:
         for tab_name, button in self.tab_buttons.items():
             button.configure(fg_color=self.button_active_color if tab_name == name else self.button_color)
         self.create_card_content(name)
-
-    def go_to_next_page(self):
-        self.main_app.show_page("Preprocessing")
