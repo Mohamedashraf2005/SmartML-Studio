@@ -111,8 +111,8 @@ class MainApp:
             self.preprocessing_app.update_column_menus()
         elif name == "ModelSelection" and self.model_selection_app:
             self.model_selection_app.load_dataset()
-            self.model_selection_app.update_ui_state()
-
+            # Remove or replace: self.model_selection_app.update_ui_state()
+            self.model_selection_app.update_ui_state()  # Add this line
     def enable_nav_buttons(self):
         for btn in self.nav_buttons.values():
             btn.configure(state="normal")
