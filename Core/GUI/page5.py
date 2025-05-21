@@ -45,6 +45,8 @@ class ModelEvaluationApp:
 
             self.update_feature_list()
             self.update_ui_state()
+            self.create_prediction_inputs()
+
         except Exception as e:
             print(f"Error loading data: {e}")
             self.status_label.configure(text=f"Error loading data: {e}", text_color="#ff0000")
@@ -341,67 +343,31 @@ class ModelEvaluationApp:
             ).pack(pady=10)
 
     def make_prediction(self):
-        """Use the trained model to make a prediction based on user inputs."""
-        if not self.trained_model:
-            self.prediction_result_label.configure(
-                text="No trained model available. Please train a model first.",
-                text_color="#ff0000"
-            )
+        """Collect input values, make prediction using trained model, and display result."""
+        if not self.trained_model or "model" not in self.trained_model:
+            self.eval_output_label.configure(text="No trained model available.", text_color="#ff0000")
             return
 
+        model = self.trained_model["model"]
+        input_values = []
+
         try:
-            model = self.trained_model.get("model")
-            required_features = self.trained_model.get("final_features")  # ✅ use final features
-
-            if required_features is None:
-                raise ValueError("Trained model does not include final feature names.")
-
-            input_data = {}
             for feature in self.selected_features:
-                entry = self.input_entries[feature]
-                value = entry.get()
+                value = self.input_entries[feature].get()
+                if value == "":
+                    raise ValueError(f"Value for '{feature}' is missing.")
+                input_values.append(float(value))  # Convert to float (or int if needed)
 
-                if not value:
-                    self.prediction_result_label.configure(
-                        text=f"Please provide a value for {feature}.",
-                        text_color="#ff0000"
-                    )
-                    return
+            # Create DataFrame with one row and the selected features as columns
+            input_df = pd.DataFrame([input_values], columns=self.selected_features)
 
-                # Numeric or categorical check
-                if self.dataset[feature].dtype in ['float64', 'int64']:
-                    try:
-                        value = float(value)
-                    except ValueError:
-                        self.prediction_result_label.configure(
-                            text=f"Invalid value for {feature}. Please enter a number.",
-                            text_color="#ff0000"
-                        )
-                        return
-                input_data[feature] = value
+            # Predict using model
+            prediction = model.predict(input_df)[0]
 
-            # Turn into DataFrame
-            user_df = pd.DataFrame([input_data])
-
-            # Apply same preprocessing used in training (if applicable)
-            preprocessor = self.trained_model.get("preprocessor")  # ✅ get pipeline/encoder if saved
-            if preprocessor:
-                processed_input = preprocessor.transform(user_df)
-                input_df = pd.DataFrame(processed_input, columns=required_features)
-            else:
-                # If no pipeline was used
-                input_df = user_df[required_features]
-
-            # Predict
-            prediction = model.predict(input_df)
-
-            self.prediction_result_label.configure(
-                text=f"Prediction: {prediction[0]}",
-                text_color="#ffffff"
+            self.eval_output_label.configure(
+                text=f"Prediction result: {prediction}", text_color="#00ff00"
             )
-
         except Exception as e:
-            self.prediction_result_label.configure(
-                text=f"Error making prediction: {e}",
-                text_color="#ff0000"
+            self.eval_output_label.configure(
+                text=f"Error in prediction: {e}", text_color="#ff0000"
             )
